@@ -1,0 +1,429 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="swiftly swiftly">
+    <title>URL Pattern Matching - swiftly swiftly</title>
+    <meta name="author" content="John Patrick Morgan">
+    
+        <meta name="keywords" content="Swift,">
+    
+    
+    
+    <meta name="description" content="When implementing deeplinks recently, I wondered if Swift’s pattern matching could improve on the existing URL routing libraries. This is an account of the different approaches I tried, and the one I">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="URL Pattern Matching">
+<meta property="og:url" content="http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/index.html">
+<meta property="og:site_name" content="swiftly swiftly">
+<meta property="og:description" content="When implementing deeplinks recently, I wondered if Swift’s pattern matching could improve on the existing URL routing libraries. This is an account of the different approaches I tried, and the one I">
+<meta property="og:updated_time" content="2016-05-12T21:32:01.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="URL Pattern Matching">
+<meta name="twitter:description" content="When implementing deeplinks recently, I wondered if Swift’s pattern matching could improve on the existing URL routing libraries. This is an account of the different approaches I tried, and the one I">
+<meta name="twitter:creator" content="@jpmmusic">
+    
+    
+        
+    
+    
+        <meta property="og:image" content="http://johnpatrickmorgan.github.io/assets/images/MajorMorgan.jpg"/>
+    
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/assets/css/style-27vrduj1jopliavvnzi7ibndpmbvg7lzo4a2uswrsi4m5vwauf2qi8s1v3or.min.css">
+    <!--STYLES END-->
+    
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+            
+        
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <h1 class="header-title">
+        <a class="header-title-link" href="/ ">swiftly swiftly</a>
+    </h1>
+    
+        
+            <a  class="header-right-picture "
+                href="#about">
+        
+        
+            <img class="header-picture" src="/assets/images/MajorMorgan.jpg"/>
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+
+        
+    
+
+<nav id="sidebar" data-behavior="4">
+    
+        <div class="sidebar-profile">
+            <a href="/#about">
+                    <img class="sidebar-profile-picture" src="/assets/images/MajorMorgan.jpg"/>
+            </a>
+            <span class="sidebar-profile-name">John Patrick Morgan</span>
+        </div>
+    
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/ "
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+                    <span class="sidebar-button-desc">Home</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/all-tags"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+                    <span class="sidebar-button-desc">Tags</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/all-archives"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+                    <span class="sidebar-button-desc">Archives</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link " href="https://github.com/johnpatrickmorgan" target="_blank">
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-github"></i>
+                    <span class="sidebar-button-desc">GitHub</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link " href="https://twitter.com/jpmmusic" target="_blank">
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-twitter"></i>
+                    <span class="sidebar-button-desc">Twitter</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post" itemscope itemType="http://schema.org/BlogPosting">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title" itemprop="headline">
+            URL Pattern Matching
+        </h1>
+    
+    <div class="post-meta">
+    <time itemprop="datePublished" content="Wed May 11 2016 21:10:39 GMT+0100">
+	
+		    May 11, 2016
+    	
+    </time>
+    
+</div>
+</div>
+    
+    <div class="post-content markdown" itemprop="articleBody">
+        <div class="main-content-wrap">
+            <p>When implementing deeplinks recently, I wondered if Swift’s pattern matching could improve on the existing URL routing libraries. This is an account of the different approaches I tried, and the one I settled on.</p>
+<a id="more"></a>
+<p>The majority of URL routing libraries use a pattern syntax that enables you to match URL path elements in one of three ways:<br>&nbsp;</p>
+<ul>
+<li><strong>Expression</strong>: Path element must match the pattern expression</li>
+<li><strong>Wildcard</strong>: Path element can be anything at all, and will be discarded</li>
+<li><strong>Value-binding</strong>: Path element can be anything at all, and will be made available in a parameters dictionary</li>
+</ul>
+<p>For example, it might look something like this:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Router</span>.register(<span class="string">"user/:userId/profile"</span>) &#123; parameters <span class="keyword">in</span></span><br><span class="line">   <span class="keyword">let</span> userId = parameters[<span class="string">"userId"</span>]</span><br><span class="line">   <span class="comment">// Show user's profile...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>There are a couple of reasons I don’t much like this approach:<br>&nbsp;</p>
+<ul>
+<li>The parameter name <code>userId</code> is repeated and is susceptible to typos.</li>
+<li>It relies on some unseen <em>magic</em> to extract wildcards and parameters from the URL based on a special syntax.</li>
+</ul>
+<p>As it happens Swift’s built-in pattern matching can be used for each of the three pattern types. Here’s an example of all three:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> example = (<span class="string">"expression-pattern"</span>, <span class="string">"wildcard-pattern"</span>, <span class="string">"value-binding-pattern"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> <span class="keyword">let</span> (<span class="string">"expression-pattern"</span>, <span class="number">_</span>, value) = example &#123;</span><br><span class="line">   <span class="built_in">print</span>(value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Moreover, Swift’s powerful switch statement would seem a natural fit for matching a URL to a single pattern. So I decided to investigate a Swift pattern-matching-based approach to URL routing. I’ll go through the specific approaches I tried and the one I finally settled on.</p>
+<p>Let’s assume we’ve parsed the path part of a URL into an array called <code>pathElements</code>, e.g., <code>https://myhost.com/user/14253/profile</code> would give us <code>[&quot;user&quot;, &quot;14253&quot;, &quot;profile&quot;]</code>. There is no pattern matching for Arrays built in to Swift, so we need to add our own somehow…</p>
+<h2 id="Approach-1-Pattern-Matching-Operator"><a href="#Approach-1-Pattern-Matching-Operator" class="headerlink" title="Approach 1: Pattern Matching Operator"></a>Approach 1: Pattern Matching Operator</h2><p>My first thought was to use the pattern-matching operator (<code>~=</code>) to match arrays of equatable elements:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> ~=&lt;T: Equatable&gt;<span class="params">(pattern: [T], value: [T])</span></span> -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">guard</span> value.<span class="built_in">count</span> == pattern.<span class="built_in">count</span> <span class="keyword">else</span> &#123; <span class="keyword">return</span> <span class="literal">false</span> &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (index, element) <span class="keyword">in</span> pattern.<span class="built_in">enumerate</span>() &#123;</span><br><span class="line">        <span class="keyword">if</span> value[index] != element &#123; <span class="keyword">return</span> <span class="literal">false</span> &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>This would allow us to match expression patterns:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> [<span class="string">"lobby"</span>, <span class="string">"main"</span>] = pathElements &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Main Lobby"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>This works well for expression patterns, but the pattern-matching operator cannot be used for wildcard or value-binding patterns, so this turns out to be a dead end.</p>
+<h2 id="Approach-2-Tuples"><a href="#Approach-2-Tuples" class="headerlink" title="Approach 2: Tuples"></a>Approach 2: Tuples</h2><p>My second thought was to decompose the <code>pathElements</code> array into a tuple so that it can be pattern matched more easily. This could be overloaded for tuple counts up to some sensible limit, e.g.:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Array</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">decompose</span><span class="params">()</span></span> -&gt; (<span class="type">Element</span>)? &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">count</span> == <span class="number">1</span> &#123; <span class="keyword">return</span> (<span class="keyword">self</span>[<span class="number">0</span>]) &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">decompose</span><span class="params">()</span></span> -&gt; (<span class="type">Element</span>, <span class="type">Element</span>)? &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">count</span> == <span class="number">2</span> &#123; <span class="keyword">return</span> (<span class="keyword">self</span>[<span class="number">0</span>], <span class="keyword">self</span>[<span class="number">1</span>]) &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">decompose</span><span class="params">()</span></span> -&gt; (<span class="type">Element</span>, <span class="type">Element</span>, <span class="type">Element</span>)? &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">count</span> == <span class="number">3</span> &#123; <span class="keyword">return</span> (<span class="keyword">self</span>[<span class="number">0</span>], <span class="keyword">self</span>[<span class="number">1</span>], <span class="keyword">self</span>[<span class="number">2</span>]) &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>This would enable pattern-matching like so:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> (<span class="string">"user"</span>, <span class="keyword">let</span> userId, <span class="string">"profile"</span>)?: (<span class="type">String</span>, <span class="type">String</span>, <span class="type">String</span>)? = pathElements.decompose() &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Profile for user <span class="subst">\(userId)</span>"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Unfortunately the compiler can’t infer the type of the tuple, which necessitates the explicit typing after the colon. Abandoning the overloaded <code>decompose()`` in favour of unique method names</code>decompose1()<code>,</code>decompose2()<code>,</code>decompose3()` etc. helps to clean things up:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> (<span class="string">"user"</span>, <span class="keyword">let</span> userId, <span class="string">"profile"</span>)? = pathElements.decompose3() &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Profile for user <span class="subst">\(userId)</span>"</span>)</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="keyword">case</span> (<span class="string">"lobby"</span>, <span class="string">"home"</span>)? = pathElements.decompose2() &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Lobby"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>However, this serves to highlight a bigger issue: we can’t use tuple decomposition to match multiple patterns within a single switch statement, unless those patterns happen to have the same element count. What would we switch on - <code>decompose2()</code> or <code>decompose3()</code>?</p>
+<h2 id="Approach-3-Linked-List"><a href="#Approach-3-Linked-List" class="headerlink" title="Approach 3: Linked List"></a>Approach 3: Linked List</h2><p>My next idea was to use a linked list structure: here’s an <a href="https://airspeedvelocity.net/2015/07/26/linked-lists-enums-value-types-and-identity/" target="_blank" rel="external">implementation by Airspeed Velocity</a>. This seems promising because it’s built out of enums (which support wildcard and value-binding patterns) and can represent an arbitrary number of elements.</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> .<span class="type">Node</span>(<span class="string">"user"</span>, .<span class="type">Node</span>(<span class="keyword">let</span> userId, .<span class="type">Node</span>(<span class="string">"profile"</span>, .<span class="type">End</span>))) = <span class="type">List</span>(pathElements) &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Profile for user <span class="subst">\(userId)</span>"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>It can also match lists of any size within a single switch statement:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> <span class="type">List</span>(pathElements) &#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> .<span class="type">End</span>, .<span class="type">Node</span>(<span class="string">""</span>, .<span class="type">End</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Home"</span>)</span><br><span class="line"><span class="keyword">case</span> .<span class="type">Node</span>(<span class="string">"lobby"</span>, .<span class="type">Node</span>(<span class="string">"main"</span>, .<span class="type">End</span>)):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Main Lobby"</span>)</span><br><span class="line"><span class="keyword">case</span> .<span class="type">Node</span>(<span class="string">"user"</span>, .<span class="type">Node</span>(<span class="keyword">let</span> userId, .<span class="type">Node</span>(<span class="string">"profile"</span>, .<span class="type">End</span>))):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Profile for user <span class="subst">\(userId)</span>"</span>)</span><br><span class="line"><span class="keyword">case</span> .<span class="type">Node</span>(<span class="string">"user"</span>, .<span class="type">Node</span>(<span class="number">_</span>, .<span class="type">Node</span>(<span class="string">"login"</span>, .<span class="type">End</span>))):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Login"</span>)</span><br><span class="line"><span class="keyword">case</span> <span class="number">_</span> <span class="keyword">where</span> pathElements.last == <span class="string">"settings"</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Settings"</span>)</span><br><span class="line"><span class="keyword">default</span>:</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>The trouble is, well, it’s ugly. All those parentheses and repeated <code>.Node</code>s make it very difficult to read. We could shorten <code>.Node</code> to a single character but nesting multiple enums still generates a confusing amount of parentheses.</p>
+<h2 id="Approach-4-Counted"><a href="#Approach-4-Counted" class="headerlink" title="Approach 4: Counted"></a>Approach 4: Counted</h2><p>My final approach was to make a compromise between approaches 2 and 3. What was needed was an enum that could represent arbitrary numbers of elements without needing too many layers of nested enums. Enter <code>Counted</code>:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Counted</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="type">N0</span></span><br><span class="line">    <span class="keyword">case</span> <span class="type">N1</span>(<span class="type">E</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">N2</span>(<span class="type">E</span>, <span class="type">E</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">N3</span>(<span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">N4</span>(<span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">N5</span>(<span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">N6</span>(<span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">N7</span>(<span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">N8</span>(<span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">N9</span>(<span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">indirect</span> <span class="keyword">case</span> <span class="type">N10Plus</span>(<span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">E</span>, <span class="type">Counted</span>&lt;<span class="type">E</span>&gt;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>(<span class="number">_</span> elements: [<span class="type">E</span>]) &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> e = elements</span><br><span class="line"></span><br><span class="line">        <span class="keyword">switch</span> e.<span class="built_in">count</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">self</span> = .<span class="type">N0</span></span><br><span class="line">        <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">self</span> = .<span class="type">N1</span>(e[<span class="number">0</span>])</span><br><span class="line">        <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">            <span class="keyword">self</span> = .<span class="type">N2</span>(e[<span class="number">0</span>], e[<span class="number">1</span>])</span><br><span class="line">        <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">            <span class="keyword">self</span> = .<span class="type">N3</span>(e[<span class="number">0</span>], e[<span class="number">1</span>], e[<span class="number">2</span>])</span><br><span class="line">        <span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">            <span class="keyword">self</span> = .<span class="type">N4</span>(e[<span class="number">0</span>], e[<span class="number">1</span>], e[<span class="number">2</span>], e[<span class="number">3</span>])</span><br><span class="line">        <span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">            <span class="keyword">self</span> = .<span class="type">N5</span>(e[<span class="number">0</span>], e[<span class="number">1</span>], e[<span class="number">2</span>], e[<span class="number">3</span>], e[<span class="number">4</span>])</span><br><span class="line">        <span class="keyword">case</span> <span class="number">6</span>:</span><br><span class="line">            <span class="keyword">self</span> = .<span class="type">N6</span>(e[<span class="number">0</span>], e[<span class="number">1</span>], e[<span class="number">2</span>], e[<span class="number">3</span>], e[<span class="number">4</span>], e[<span class="number">5</span>])</span><br><span class="line">        <span class="keyword">case</span> <span class="number">7</span>:</span><br><span class="line">            <span class="keyword">self</span> = .<span class="type">N7</span>(e[<span class="number">0</span>], e[<span class="number">1</span>], e[<span class="number">2</span>], e[<span class="number">3</span>], e[<span class="number">4</span>], e[<span class="number">5</span>], e[<span class="number">6</span>])</span><br><span class="line">        <span class="keyword">case</span> <span class="number">8</span>:</span><br><span class="line">            <span class="keyword">self</span> = .<span class="type">N8</span>(e[<span class="number">0</span>], e[<span class="number">1</span>], e[<span class="number">2</span>], e[<span class="number">3</span>], e[<span class="number">4</span>], e[<span class="number">5</span>], e[<span class="number">6</span>], e[<span class="number">7</span>])</span><br><span class="line">        <span class="keyword">case</span> <span class="number">9</span>:</span><br><span class="line">            <span class="keyword">self</span> = .<span class="type">N9</span>(e[<span class="number">0</span>], e[<span class="number">1</span>], e[<span class="number">2</span>], e[<span class="number">3</span>], e[<span class="number">4</span>], e[<span class="number">5</span>], e[<span class="number">6</span>], e[<span class="number">7</span>], e[<span class="number">8</span>])</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">self</span> = .<span class="type">N10Plus</span>(e[<span class="number">0</span>], e[<span class="number">1</span>], e[<span class="number">2</span>], e[<span class="number">3</span>], e[<span class="number">4</span>], e[<span class="number">5</span>], e[<span class="number">6</span>], e[<span class="number">7</span>], e[<span class="number">8</span>], e[<span class="number">9</span>], <span class="type">Counted</span>(<span class="type">Array</span>(e[<span class="number">10</span>..&lt;elements.endIndex])))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> elements: [<span class="type">E</span>] &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">switch</span> <span class="keyword">self</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> .<span class="type">N0</span>:</span><br><span class="line">            <span class="keyword">return</span> []</span><br><span class="line">        <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N1</span>(e1):</span><br><span class="line">            <span class="keyword">return</span> [e1]</span><br><span class="line">        <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N2</span>(e1, e2):</span><br><span class="line">            <span class="keyword">return</span> [e1, e2]</span><br><span class="line">        <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N3</span>(e1, e2, e3):</span><br><span class="line">            <span class="keyword">return</span> [e1, e2, e3]</span><br><span class="line">        <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N4</span>(e1, e2, e3, e4):</span><br><span class="line">            <span class="keyword">return</span> [e1, e2, e3, e4]</span><br><span class="line">        <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N5</span>(e1, e2, e3, e4, e5):</span><br><span class="line">            <span class="keyword">return</span> [e1, e2, e3, e4, e5]</span><br><span class="line">        <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N6</span>(e1, e2, e3, e4, e5, e6):</span><br><span class="line">            <span class="keyword">return</span> [e1, e2, e3, e4, e5, e6]</span><br><span class="line">        <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N7</span>(e1, e2, e3, e4, e5, e6, e7):</span><br><span class="line">            <span class="keyword">return</span> [e1, e2, e3, e4, e5, e6, e7]</span><br><span class="line">        <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N8</span>(e1, e2, e3, e4, e5, e6, e7, e8):</span><br><span class="line">            <span class="keyword">return</span> [e1, e2, e3, e4, e5, e6, e7, e8]</span><br><span class="line">        <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N9</span>(e1, e2, e3, e4, e5, e6, e7, e8, e9):</span><br><span class="line">            <span class="keyword">return</span> [e1, e2, e3, e4, e5, e6, e7, e8, e9]</span><br><span class="line">        <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N10Plus</span>(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, remainder):</span><br><span class="line">            <span class="keyword">return</span> [e1, e2, e3, e4, e5, e6, e7, e8, e9, e10] + remainder.elements</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Counted is an enum where each case has a different number of elements. As with the Linked List, an indirect case enables arrays with arbitrary counts to be represented via multiple nested <code>Counted</code> enums. However, nesting is only necessary for counts of 10 or more, which makes things easier to read:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> .<span class="type">N3</span>(<span class="string">"user"</span>, <span class="keyword">let</span> userId, <span class="string">"profile"</span>) = <span class="type">Counted</span>(pathElements) &#123;</span><br><span class="line">    <span class="comment">// show profile for userId</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>The names of enum cases cannot begin with a digit and must be unique, so each case name comprises the count prefixed with <code>N</code>. Counted can also be used in switch statements:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> <span class="type">Counted</span>(pathElements) &#123;</span><br><span class="line"><span class="keyword">case</span> .<span class="type">N0</span>, .<span class="type">N1</span>(<span class="string">""</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Home"</span>)</span><br><span class="line"><span class="keyword">case</span> .<span class="type">N2</span>(<span class="string">"lobby"</span>, <span class="string">"main"</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Main lobby"</span>)</span><br><span class="line"><span class="keyword">case</span> .<span class="type">N3</span>(<span class="string">"user"</span>, <span class="keyword">let</span> userId, <span class="string">"profile"</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Profile for user <span class="subst">\(userId)</span>"</span>)</span><br><span class="line"><span class="keyword">case</span> .<span class="type">N3</span>(<span class="string">"user"</span>, <span class="number">_</span>, <span class="string">"login"</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Login"</span>)</span><br><span class="line"><span class="keyword">case</span> <span class="number">_</span> <span class="keyword">where</span> pathElements.last == <span class="string">"settings"</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Settings"</span>)</span><br><span class="line"><span class="keyword">default</span>:</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>This enables us to pattern match paths with any number of elements, and supports all three pattern types without the need for any special syntax.</p>
+<p>As a bonus, because Counted is generic, you can use it to pattern match other types too, e.g. Ints:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> semVer = <span class="string">"3.2.1"</span></span><br><span class="line"><span class="keyword">let</span> components = semVer.componentsSeparatedByString(<span class="string">"."</span>).flatMap &#123; <span class="type">Int</span>($<span class="number">0</span>) &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N3</span>(major, minor, patch) = <span class="type">Counted</span>(components) &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>I’ll follow this post up with a description of how I use it to implement deep-links within an app.</p>
+
+            
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--disabled">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--disabled">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2016 John Patrick Morgan. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--disabled">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--disabled">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+    <ul class="share-options">
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/">
+                <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/">
+                <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/">
+                <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+            
+        </div>
+        
+
+
+    
+        
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-remove"></i>
+        </div>
+        
+            <img id="about-card-picture" src="/assets/images/MajorMorgan.jpg"/>
+        
+            <h4 id="about-card-name">John Patrick Morgan</h4>
+        
+            <h5 id="about-card-bio"><p>-</p>
+</h5>
+        
+        
+            <h5 id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>iOS Developer</p>
+
+            </h5>
+        
+        
+            <h5 id="about-card-location">
+                <i class="fa fa-map-marker"></i>
+                <br/>
+                London
+            </h5>
+        
+    </div>
+</div>
+
+        
+<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
+    </body>
+    <!--SCRIPTS-->
+<script src="/assets/js/scrip-tu4ziscb5jrkjxubeugdgizktyuugflfq5jvgz4agzzmwifuq01g1lmq8giw.min.js"></script>
+<!--SCRIPTS END-->
+
+    
+
+
+
+</html>
