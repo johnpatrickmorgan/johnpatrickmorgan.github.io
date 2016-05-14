@@ -19,7 +19,7 @@
 <meta property="og:url" content="http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/index.html">
 <meta property="og:site_name" content="swiftly swiftly">
 <meta property="og:description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could be used to match URLs rather than using a URL routing library. This is an account of the different app">
-<meta property="og:updated_time" content="2016-05-13T20:10:45.000Z">
+<meta property="og:updated_time" content="2016-05-14T09:33:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="URL Pattern Matching">
 <meta name="twitter:description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could be used to match URLs rather than using a URL routing library. This is an account of the different app">
@@ -32,8 +32,8 @@
         <meta property="og:image" content="http://johnpatrickmorgan.github.io/assets/images/MajorMorgan.jpg"/>
     
     
-        <meta property="og:image" content="2016/05/11/URLPatternMatching//Abacus.png"/>
-        <meta class="swiftype" name="image" data-type="enum" content="2016/05/11/URLPatternMatching//Abacus.png" />
+        <meta property="og:image" content="2016/05/11/URLPatternMatching//Abacus.jpg"/>
+        <meta class="swiftype" name="image" data-type="enum" content="2016/05/11/URLPatternMatching//Abacus.jpg" />
     
     
     
@@ -228,7 +228,7 @@
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> .<span class="type">N3</span>(<span class="string">"user"</span>, <span class="keyword">let</span> userId, <span class="string">"profile"</span>) = <span class="type">Counted</span>(pathElements) &#123;</span><br><span class="line">    <span class="comment">// show profile for userId</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>The names of enum cases cannot begin with a digit and must be unique, so each case name comprises the count prefixed with <code>N</code>: unfortunately, they can’t be further abbreviated. <code>Counted</code> enables us to pattern match paths with any number of elements, and supports <strong>expression</strong>, <strong>wildcard</strong> and <strong>value-binding</strong> patterns for its associated values. It can also be used in switch statements:</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> <span class="type">Counted</span>(pathElements) &#123;</span><br><span class="line"><span class="keyword">case</span> .<span class="type">N0</span>, .<span class="type">N1</span>(<span class="string">""</span>):</span><br><span class="line">    <span class="comment">// Open home</span></span><br><span class="line"><span class="keyword">case</span> .<span class="type">N2</span>(<span class="string">"lobby"</span>, <span class="string">"main"</span>):</span><br><span class="line">    <span class="comment">// Open lobby</span></span><br><span class="line"><span class="keyword">case</span> .<span class="type">N3</span>(<span class="string">"user"</span>, <span class="keyword">let</span> userId, <span class="string">"profile"</span>):</span><br><span class="line">    <span class="comment">// Open profile for userId</span></span><br><span class="line"><span class="keyword">case</span> .<span class="type">N3</span>(<span class="string">"user"</span>, <span class="number">_</span>, <span class="string">"login"</span>):</span><br><span class="line">    <span class="comment">// Open login</span></span><br><span class="line"><span class="keyword">case</span> <span class="number">_</span> <span class="keyword">where</span> pathElements.last == <span class="string">"settings"</span>:</span><br><span class="line">    <span class="comment">// Open settings</span></span><br><span class="line"><span class="keyword">default</span>:</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>As a bonus, because Counted is generic, you can use it to pattern match other types too, e.g. <code>Int</code>s:</p>
+<p>As a bonus, because <code>Counted</code> is generic, you can use it to pattern match other types too, e.g. <code>Int</code>s:</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> semVer = <span class="string">"3.2.1"</span></span><br><span class="line"><span class="keyword">let</span> components = semVer.componentsSeparatedByString(<span class="string">"."</span>).flatMap &#123; <span class="type">Int</span>($<span class="number">0</span>) &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">N3</span>(major, minor, patch) = <span class="type">Counted</span>(components) &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>In the next post I’ll show how I use this approach to enable deep-linking via URLs.</p>
 
@@ -240,7 +240,7 @@
             <div class="post-footer-tags">
                 <span class="text-color-light text-small">TAGGED IN</span><br/>
                 
-    <a class="tag tag--primary tag--small t-link" href="/tags/swift-pattern-matching/">swift, pattern-matching</a>
+    <a class="tag tag--primary tag--small t-link" href="/tags/Pattern-Matching/">Pattern Matching</a> <a class="tag tag--primary tag--small t-link" href="/tags/Swift/">Swift</a> <a class="tag tag--primary tag--small t-link" href="/tags/URL-Routing/">URL Routing</a>
 
             </div>
         
