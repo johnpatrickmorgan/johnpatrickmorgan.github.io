@@ -19,7 +19,7 @@
 <meta property="og:url" content="http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/index.html">
 <meta property="og:site_name" content="johnpatrickmorgan">
 <meta property="og:description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could be a viable alternative to a URL routing library. This is an account of the different approaches I tri">
-<meta property="og:updated_time" content="2016-05-19T20:32:42.000Z">
+<meta property="og:updated_time" content="2016-05-19T20:40:17.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="URL Pattern Matching">
 <meta name="twitter:description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could be a viable alternative to a URL routing library. This is an account of the different approaches I tri">
@@ -183,11 +183,12 @@
 <li><strong>Value-binding</strong>: Path element can be anything at all, and will be made available in a parameters dictionary</li>
 </ul>
 <p>For example, it might look something like this:</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Router</span>.register(<span class="string">"user/:userId/*"</span>) &#123; parameters <span class="keyword">in</span></span><br><span class="line">   <span class="keyword">let</span> userId = parameters[<span class="string">"userId"</span>]</span><br><span class="line">   <span class="comment">// Show user's profile...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>There are a couple of reasons I don’t much like this approach:<br>&nbsp;</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Router</span>.register(<span class="string">"user/:userId/*"</span>) &#123; parameters <span class="keyword">in</span></span><br><span class="line">   <span class="keyword">let</span> userId = parameters[<span class="string">"userId"</span>]!</span><br><span class="line">   <span class="comment">// Show user's profile...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>There are a few reasons I don’t much like this approach:<br>&nbsp;</p>
 <ul>
-<li>The parameter name <code>userId</code> is repeated and is susceptible to typos.</li>
 <li>The pattern matching is abstracted away using special syntax.</li>
+<li>The parameter name <code>userId</code> is repeated and is susceptible to typos.</li>
+<li><code>parameters[&quot;userId&quot;]</code> should never be nil, but the compiler doesn’t know that, so we must force unwrap or add a <code>guard</code> statement.</li>
 </ul>
 <p>As it happens Swift’s built-in pattern matching can be used for each of the three pattern types. Here’s an example of all three:</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> example = (<span class="string">"expression-pattern"</span>, <span class="string">"wildcard-pattern"</span>, <span class="string">"value-binding-pattern"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">case</span> <span class="keyword">let</span> (<span class="string">"expression-pattern"</span>, <span class="number">_</span>, value) = example &#123;</span><br><span class="line">   <span class="comment">// use value</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
