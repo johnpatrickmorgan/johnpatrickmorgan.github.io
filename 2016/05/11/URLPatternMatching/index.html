@@ -19,7 +19,7 @@
 <meta property="og:url" content="http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/index.html">
 <meta property="og:site_name" content="johnpatrickmorgan">
 <meta property="og:description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could be a viable alternative to a URL routing library. This is an account of the different approaches I tri">
-<meta property="og:updated_time" content="2016-05-19T20:40:17.000Z">
+<meta property="og:updated_time" content="2016-05-19T21:21:59.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="URL Pattern Matching">
 <meta name="twitter:description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could be a viable alternative to a URL routing library. This is an account of the different approaches I tri">
@@ -249,6 +249,7 @@
 </li>
 </ul>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="keyword">let</span> link = <span class="type">DeepLink</span>(url: url) <span class="keyword">where</span> link != .<span class="type">Settings</span> &#123;</span><br><span class="line">    <span class="type">DeepLinker</span>.open(link)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>What do you think? Do you prefer the ‘swiftier’ approach (damn, I nearly managed to avoid that word), or am I misrepresenting URL routing libraries?</p>
 
             
         </div>
