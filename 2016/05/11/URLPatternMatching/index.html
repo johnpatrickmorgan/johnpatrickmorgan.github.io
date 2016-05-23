@@ -13,16 +13,16 @@
     
     
     
-    <meta name="description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could be a viable alternative to a URL routing library. This is an account of the different approaches I tri">
+    <meta name="description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could make a viable alternative to a URL routing library. This is an account of the different approaches I t">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="URL Pattern Matching">
 <meta property="og:url" content="http://johnpatrickmorgan.github.io/2016/05/11/URLPatternMatching/index.html">
 <meta property="og:site_name" content="johnpatrickmorgan">
-<meta property="og:description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could be a viable alternative to a URL routing library. This is an account of the different approaches I tri">
-<meta property="og:updated_time" content="2016-05-23T19:42:58.000Z">
+<meta property="og:description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could make a viable alternative to a URL routing library. This is an account of the different approaches I t">
+<meta property="og:updated_time" content="2016-05-23T21:38:03.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="URL Pattern Matching">
-<meta name="twitter:description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could be a viable alternative to a URL routing library. This is an account of the different approaches I tri">
+<meta name="twitter:description" content="When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could make a viable alternative to a URL routing library. This is an account of the different approaches I t">
 <meta name="twitter:creator" content="@jpmmusic">
     
     
@@ -185,9 +185,9 @@
     
     <div class="post-content markdown" itemprop="articleBody">
         <div class="main-content-wrap">
-            <p>When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could be a viable alternative to a URL routing library. This is an account of the different approaches I tried, and the one I finally settled on.</p>
+            <p>When implementing deeplinks for an iOS app recently, I wondered if Swift’s pattern matching could make a viable alternative to a URL routing library. This is an account of the different approaches I tried, and the one I finally settled on.</p>
 <a id="more"></a>
-<p>The majority of URL routing libraries use a pattern syntax that enables you to match URL path elements in one of three ways:<br>&nbsp;</p>
+<p>The majority of URL routing libraries use a pattern syntax that can match each element of a URL’s path in one of three ways:<br>&nbsp;</p>
 <ul>
 <li><strong>Equality</strong>: Path element must match the pattern expression</li>
 <li><strong>Value-binding</strong>: Path element can be anything at all, and will be made available in a parameters dictionary</li>
@@ -233,7 +233,7 @@
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">func</span> ~=<span class="params">(regex: Regex, string: String)</span></span> -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> regex.matches(string)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>As a result we can use <code>Regex</code> to match individual path elements within <code>Counted</code>. For example, the following case would match both <code>/pages/contact-us_gbr</code> and <code>/pages/contact-us_usa</code>:</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> .<span class="type">N2</span>(<span class="string">"pages"</span>, <span class="type">Regex</span>(<span class="string">"contact_.*"</span>)):</span><br><span class="line">    <span class="comment">// Open contact page</span></span><br></pre></td></tr></table></figure>
-<h2 id="URLPatterns"><a href="#URLPatterns" class="headerlink" title="URLPatterns"></a>URLPatterns</h2><p>I added structs <code>Begins(...)</code> and <code>Ends(...)</code>, which use the <a href="https://github.com/johnpatrickmorgan/URLPatterns/blob/master/URLPatterns/Classes/CountedExpressionMatching.swift" target="_blank" rel="external">pattern-matching operator</a> to match <code>Counted</code> instances based purely on a slice of the path elements. I also added extensions to <code>NSURL</code> and <code>NSURLComponents</code> to make a <code>Counted</code> list of path elements and a <code>Dictionary</code> of query arguments easily available. The code is available here: <a href="https://github.com/johnpatrickmorgan/URLPatterns" target="_blank" rel="external">URLPatterns</a>.</p>
+<p>I added structs <code>Begins(...)</code> and <code>Ends(...)</code>, which use the <a href="https://github.com/johnpatrickmorgan/URLPatterns/blob/master/URLPatterns/Classes/CountedExpressionMatching.swift" target="_blank" rel="external">pattern-matching operator</a> to match <code>Counted</code> instances based purely on a slice of the path elements. I also added extensions to <code>NSURL</code> and <code>NSURLComponents</code> to make a <code>Counted</code> list of path elements and a <code>Dictionary</code> of query arguments easily available. The code is available here: <a href="https://github.com/johnpatrickmorgan/URLPatterns" target="_blank" rel="external">URLPatterns</a>.</p>
 <h2 id="Deep-linking"><a href="#Deep-linking" class="headerlink" title="Deep-linking"></a>Deep-linking</h2><p>Now that I can do more idiomatic Swift pattern-matching for URL path elements, here’s how I use it for deep-linking. I define my app’s deep-link destinations as an enum:</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">DeepLink</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="type">Home</span>, <span class="type">History</span>, <span class="type">Settings</span>, <span class="type">Terms</span>, <span class="type">News</span>, <span class="type">Contact</span></span><br><span class="line">    <span class="keyword">case</span> <span class="type">Chat</span>(room: <span class="type">String</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">Profile</span>(userId: <span class="type">String</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>I then add a failable initializer to <code>DeepLink</code>, which takes an <code>NSURL</code>. This is where the pattern-matching happens:</p>
@@ -254,7 +254,7 @@
 </li>
 </ul>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="keyword">let</span> link = <span class="type">DeepLink</span>(url: url) <span class="keyword">where</span> !link.requiresLogin &#123;</span><br><span class="line">    <span class="type">DeepLinker</span>.open(link)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>What do you think? Do you like the ‘swiftier’ approach (damn, I nearly managed to avoid that word), or am I misrepresenting URL routing libraries?</p>
+<p>What do you think? Do you like the ‘swiftier’ approach (damn, I nearly managed to avoid that word), or am I misrepresenting URL routing libraries?  </p>
 
             
         </div>
