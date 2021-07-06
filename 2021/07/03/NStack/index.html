@@ -64,7 +64,7 @@
     
         
             
-<link rel="stylesheet" href="/assets/css/gitalk.css">
+<link rel="stylesheet" href="/assets/css/gitment.css">
 
         
     
@@ -391,7 +391,7 @@
                 <li class="post-action">
                     <a
                         class="post-action-btn btn btn--default"
-                        href="#gitalk"
+                        href="#gitment"
                         aria-label="Leave a comment"
                     >
                         <i class="fa fa-comment"></i>
@@ -413,8 +413,7 @@
         
         
             
-                <div id="gitalk"></div>
-
+                <div id="gitment"></div>
             
         
     </div>
@@ -516,7 +515,7 @@
                 <li class="post-action">
                     <a
                         class="post-action-btn btn btn--default"
-                        href="#gitalk"
+                        href="#gitment"
                         aria-label="Leave a comment"
                     >
                         <i class="fa fa-comment"></i>
@@ -636,19 +635,19 @@
 
     
         
-<script src="/assets/js/gitalk.js"></script>
+<script src="/assets/js/gitment.js"></script>
 
         <script type="text/javascript">
           (function() {
-            new Gitalk({
-              clientID: 'c86c0ea73885f7f5bf5b',
-              clientSecret: 'f62a7e7c400e1dd6253c922492b76f9a4505dc27',
-              repo: 'johnpatrickmorgan.github.io',
+            new Gitment({
+              id: 'https://johnpatrickmorgan.github.io/2021/07/03/NStack/',
               owner: 'johnpatrickmorgan',
-              admin: ['johnpatrickmorgan'],
-              id: '2021/07/03/NStack/',
-              ...{"language":"en","perPage":10,"distractionFreeMode":false,"enableHotKey":true,"pagerDirection":"first"}
-            }).render('gitalk')
+              repo: 'johnpatrickmorgan.github.io',
+              oauth: {
+                client_id: 'c86c0ea73885f7f5bf5b',
+                client_secret: 'f62a7e7c400e1dd6253c922492b76f9a4505dc27'
+              }
+            }).render('gitment')
           })()
         </script>
     
